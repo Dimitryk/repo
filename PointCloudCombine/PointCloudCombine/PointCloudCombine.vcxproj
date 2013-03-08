@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\PointCloud\PointCloud\arrayList.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\gl3w.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\GLSLprogram.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\GLSLshader.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\gMatrix.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\icp.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\mouseFunctions.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\octTree.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\Program.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\robj.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\robjtogl.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\rply.c" />
+    <ClCompile Include="..\..\PointCloud\PointCloud\rPPoints.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\PointCloud\PointCloud\arrayList.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\gl3w.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\glcorearb.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\glfw_wrapper.hpp" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\GLSLprogram.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\GLSLshader.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\gMatrix.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\icp.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\mouseFunctions.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\octTree.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\randomHelper.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\robj.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\robjtogl.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\rply.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\rPPoints.h" />
+    <ClInclude Include="..\..\PointCloud\PointCloud\vector.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\PointCloud\PointCloud\fragmentShaderSource.frag" />
+    <None Include="..\..\PointCloud\PointCloud\vertexShaderSource.vert" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F79B7578-2C4D-463A-A72E-C6443F2ED59E}</ProjectGuid>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>PointCloudCombine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
