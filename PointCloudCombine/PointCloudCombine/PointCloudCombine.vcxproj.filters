@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\OpenGL">
+      <UniqueIdentifier>{9d3a96e5-3159-41f3-b5b2-429eecf80c60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Mesh">
+      <UniqueIdentifier>{96a442c5-3e3f-41b9-9148-cb3deb7af035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GLSL">
+      <UniqueIdentifier>{d7397d01-fcb2-43bc-9cfd-e0870e813338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MathHelper">
+      <UniqueIdentifier>{c2b762c0-5c0b-4d42-9bd0-856679f1e7fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL">
+      <UniqueIdentifier>{978ac2f5-c3df-4c82-b27a-04143bef15b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Mesh">
+      <UniqueIdentifier>{c1a84f66-1c22-4f42-b85a-a38487dca3ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL">
+      <UniqueIdentifier>{d5bf8b56-6414-401a-a02d-4c154cce0f02}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="icpOctTree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kdTree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="arrayList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gMatrix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="icp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mouseFunctions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="octTree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gl3w.c">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="GLSLprogram.c">
+      <Filter>Source Files\GLSL</Filter>
+    </ClCompile>
+    <ClCompile Include="GLSLshader.c">
+      <Filter>Source Files\GLSL</Filter>
+    </ClCompile>
+    <ClCompile Include="robj.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="robjtogl.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="rply.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="meshObject.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rplytogl.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="kdTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="arrayList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mouseFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="octTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gl3w.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="glfw_wrapper.hpp">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="glcorearb.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="robj.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="robjtogl.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="rply.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="randomHelper.h">
+      <Filter>Header Files\MathHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Header Files\MathHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="gMatrix.h">
+      <Filter>Header Files\MathHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="GLSLshader.h">
+      <Filter>Header Files\GLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="GLSLprogram.h">
+      <Filter>Header Files\GLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="meshObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rplytogl.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\PointCloud\PointCloud\fragmentShaderSource.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\PointCloud\PointCloud\vertexShaderSource.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
