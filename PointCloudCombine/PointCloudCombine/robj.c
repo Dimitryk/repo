@@ -3,7 +3,7 @@
 #include <string.h>
 #include "robj.h"
 
-#define BUFFERSIZE 512
+#define BUFFERSIZE 1024
 #define WHITESPACE " \t\n\r"
 
 typedef struct obj_t_{

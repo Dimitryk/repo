@@ -6,7 +6,9 @@
 #include "gMatrix.h"
 #include "vector.h"
 
-
+/* Calculates surface Normal of a triangle
+ * NB returned normal is not of unit length
+ */
 static Vector3f calculateNormal(GLfloat triagleVertexArray[]){
 	Vector3f Normal; 
 	GLfloat l;
@@ -29,16 +31,20 @@ static Vector3f calculateNormal(GLfloat triagleVertexArray[]){
 
 	return Normal;
 }
+/* Calculates and sets the normal Array of a given object
+ * Given the element index List and vertex list
+ * NB normals are not uniform
+ */
 static int createNormArray(meshObject *object){
-	unsigned int i;
 	Vector3f tempNorm;
 	GLfloat triVertexArray[9];
-	GLfloat *normArray;
+	unsigned int i;
+	GLfloat *normSumArray;
 	GLfloat *vertexArray = object->vertexArray;
 	GLuint *elementArray = object->elementArray;
 
-	normArray = (GLfloat*) malloc(object->vertexCount *  sizeof(Vector3f));
-	if(normArray == NULL)
+	normSumArray = (GLfloat*) calloc(object->vertexCount, sizeof(GLfloat));
+	if(normSumArray == NULL)
 		return -1;
 
 	for(i = 0; i < object->elementCount; i += 3){
@@ -53,17 +59,17 @@ static int createNormArray(meshObject *object){
 		triVertexArray[8] = vertexArray[elementArray[i + 2] * 3 + 2];
 
 		tempNorm = calculateNormal(triVertexArray);
-		normArray[elementArray[i] * 3 + 0] = tempNorm.x;
-		normArray[elementArray[i] * 3 + 1] = tempNorm.y;
-		normArray[elementArray[i] * 3 + 2] = tempNorm.z;
-		normArray[elementArray[i + 1] * 3 + 0] = tempNorm.x;
-		normArray[elementArray[i + 1] * 3 + 1] = tempNorm.y;
-		normArray[elementArray[i + 1] * 3 + 2] = tempNorm.z;
-		normArray[elementArray[i + 2] * 3 + 0] = tempNorm.x;
-		normArray[elementArray[i + 2] * 3 + 1] = tempNorm.y;
-		normArray[elementArray[i + 2] * 3 + 2] = tempNorm.z;
+		normSumArray[elementArray[i] * 3 + 0] += tempNorm.x;
+		normSumArray[elementArray[i] * 3 + 1] += tempNorm.y;
+		normSumArray[elementArray[i] * 3 + 2] += tempNorm.z;
+		normSumArray[elementArray[i + 1] * 3 + 0] += tempNorm.x;
+		normSumArray[elementArray[i + 1] * 3 + 1] += tempNorm.y;
+		normSumArray[elementArray[i + 1] * 3 + 2] += tempNorm.z;
+		normSumArray[elementArray[i + 2] * 3 + 0] += tempNorm.x;
+		normSumArray[elementArray[i + 2] * 3 + 1] += tempNorm.y;
+		normSumArray[elementArray[i + 2] * 3 + 2] += tempNorm.z;
 	}
-	object->normalsArray = normArray;
+	object->normalsArray = normSumArray;
 	return 1;
 }
 
@@ -162,7 +168,7 @@ meshObject* createMeshObject(char* fileName, GLSLprogram* shaderProgram){
 	return object;
 }
 
-void meshObjectChangeProgram(meshObject* object, GLSLprogram* shaderProgram){
+void meshObjectChangeShaderProgram(meshObject* object, GLSLprogram* shaderProgram){
 	object->shaderProgram = shaderProgram;
 }
 
@@ -186,8 +192,11 @@ void drawMeshObject(meshObject* object){
 }
 
 void deleteMeshObject(meshObject* object){
-	free(object->elementArray);
-	free(object->normalsArray);
-	free(object->vertexArray);
+	if(object->elementArray != NULL)
+		free(object->elementArray);
+	if(object->normalsArray != NULL)
+		free(object->normalsArray);
+	if(object->vertexArray != NULL)
+		free(object->vertexArray);
 	free(object);
 }

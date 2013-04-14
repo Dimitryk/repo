@@ -7,9 +7,10 @@
 
 #define MODEL_TREE_DEPTH 5
 #define MAX_FLOAT_VALUE 9999.9f
-#define THRESHOLD 0.01f
+#define THRESHOLD 0.1f
 #define DELTA_THRESHOLD 0.001f
 #define MAX_LOCAL_ICP_ITERATIONS 50
+#define DATA_RATIO 0.2f
 
 /* Macro dotTrnsVct
  * takes dst, v1, v2, must be static arrays or pointers of atleast 3 values
@@ -64,9 +65,10 @@
 
 
 typedef struct icpStruct_t{
-	int maxModelPairs;
+	int maxPairs;
 	int dataSize;
 	float *data;
+	float **dataPair;
 	float **modelPair;
 	kdTree_p model;
 	float *registrationMatrix;
@@ -93,11 +95,11 @@ static float* sntrMass(float* dst, float *mesh, int size){
 
 static float* crossVarMtx(float *dst, icpStruct *icp){
 	float dataDotmodel[9];
-	float *endPointer = icp->data + icp->dataSize;
-	float *data = icp->data;
+	float **endPntr = icp->dataPair + icp->maxPairs;
+	float **dataPair = icp->dataPair;
 	float **modelPair = icp->modelPair;
-	for( ; data < endPointer; data += 3, modelPair++){
-		dotTrnsVct(dataDotmodel, data, *modelPair);
+	for( ; dataPair < endPntr; dataPair++, modelPair++){
+		dotTrnsVct(dataDotmodel, *dataPair, *modelPair);
 		mtx9AddMtx9(dst, dataDotmodel);
 	}
 	dotTrnsVct(dataDotmodel, icp->dataSntrMass, icp->modelSntrMass);
@@ -291,7 +293,6 @@ static float* rotationMtrxFromQuaternion( float *dst, float *q )
 			return dst;
 		}
 
-
 static void nonHomogen3DVctrMtrxMultiply(float *matrix, float *vector){
 	float temp[4], homegenVector[4], sum;
 	int row, col;
@@ -375,23 +376,30 @@ static float* createRegistrationMatrix(float *registrationMatrix, icpStruct* icp
 	return registrationMatrix;
 }
 
+static void createRandomIndexPair(icpStruct *icp){
+	float **endPairPntr = icp->dataPair + icp->maxPairs, **dataPair;
+	for( dataPair = icp->dataPair; dataPair < endPairPntr; dataPair++){
+		*dataPair = icp->data + randomNumber(icp->dataSize);
+	}
+}
+
 static float findClosestPair(icpStruct *icp){
-	float **endPntr = icp->modelPair + icp->maxModelPairs;
+	float **endPntr = icp->modelPair + icp->maxPairs;
 	float distance, avrDistance = 0;
-	kdTree_p _model = icp->model;
-	float **_modelPair = icp->modelPair;
-	float *_data = icp->data;
+	kdTree_p model = icp->model;
+	float **modelPair = icp->modelPair;
+	float **dataPair = icp->dataPair;
 	time_t start, end;
 	double timespend;
 	start= time(NULL);
-	for( ; _modelPair < endPntr ; _modelPair++, _data += 3){
-		if((*_modelPair = closestPnt(_model, _data, &distance)) == NULL)
+	for( ; modelPair < endPntr ; modelPair++, dataPair++){
+		if((*modelPair = closestPnt(model, *dataPair, &distance)) == NULL)
 			return -1;//something bad happened in tree
 		avrDistance += distance;
 	}
 	end = time(NULL);
 	timespend = difftime(end,start);
-	return (avrDistance/3)/icp->maxModelPairs;
+	return (avrDistance/3)/icp->maxPairs;
 }
 
 static void matrixMultiply4fv(float *matrix, float* multipyByMatrix){
@@ -427,13 +435,13 @@ static void applyInitialRegistration(icpStruct *icp){
 	mtrxVctrMultiply4f(icp->registrationMatrix, icp->dataSntrMass);
 }
 
-
 static icpStruct* localICPRegistration(icpStruct *icp, float threshold, float deltaThreshold, int maxIterations){
 	int iteration;
 	float newError;
 	float optimalRegistrationMatrix[16];
 	//run Local ICP loop
 	for(iteration = 0; iteration < maxIterations; iteration++){
+		createRandomIndexPair(icp);
 		//find pairs and check if error is lower then treshHold
 		if((newError = findClosestPair(icp))<0)
 			return icp;//something BAD ERROR HANDLING
@@ -457,12 +465,15 @@ static icpStruct* createICPInstance( int modelSize, int dataSize ){
 	icpStruct *icp;
 
 	icp = (icpStruct*)malloc(sizeof(icpStruct));
+
+	icp->maxPairs = (int)( (min(modelSize, dataSize) / 3) * DATA_RATIO );
+	icp->dataSize = dataSize;
+
 	icp->model = (kdTree_p)malloc(sizeof(kdTree_p));
 	icp->data = (float*)malloc(sizeof(float) * dataSize);
-	icp->maxModelPairs = min(modelSize, dataSize) / 3;
 	icp->registrationMatrix = (float*)malloc(sizeof(float) * 16);
-	icp->dataSize = dataSize;
-	icp->modelPair = (float**)malloc(sizeof(float*) * icp->maxModelPairs);
+	icp->modelPair = (float**)malloc(sizeof(float*) * icp->maxPairs);
+	icp->dataPair = (float**)malloc(sizeof(float*) * icp->maxPairs);
 	
 	return icp;
 }
@@ -476,7 +487,7 @@ static void deleteICPInstance(icpStruct *icp){
 }
 
 float* globalICPRegistration(	float* model, int modelSize, 
-								Vector3f min, Vector3f max, 
+								Vector3f minModelBounds, Vector3f maxModelBounds, 
 								float *data, int dataSize,
 								int maxIterations)
 {
@@ -505,9 +516,9 @@ float* globalICPRegistration(	float* model, int modelSize,
 		toIdentity(localICP->registrationMatrix, 4);
 
 		//fill registration Translation vector with random trans values
-		matrix4Access(localICP->registrationMatrix, 0, 3) = randomInLimitf(min.x,max.x);
-		matrix4Access(localICP->registrationMatrix, 1, 3) = randomInLimitf(min.y,max.y);
-		matrix4Access(localICP->registrationMatrix, 2, 3) = randomInLimitf(min.z,max.z);
+		matrix4Access(localICP->registrationMatrix, 0, 3) = randomInLimitf(minModelBounds.x, maxModelBounds.x);
+		matrix4Access(localICP->registrationMatrix, 1, 3) = randomInLimitf(minModelBounds.y, maxModelBounds.y);
+		matrix4Access(localICP->registrationMatrix, 2, 3) = randomInLimitf(minModelBounds.z, maxModelBounds.z);
 		applyInitialRegistration(localICP);
 
 		localICPRegistration(localICP, THRESHOLD, DELTA_THRESHOLD, MAX_LOCAL_ICP_ITERATIONS);

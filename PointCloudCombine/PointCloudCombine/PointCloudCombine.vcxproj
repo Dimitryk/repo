@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="arrayList.c" />
+    <ClCompile Include="pointCloudCombine.c" />
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="GLSLprogram.c" />
     <ClCompile Include="GLSLshader.c" />
@@ -30,6 +31,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arrayList.h" />
+    <ClInclude Include="binarySearch.h" />
+    <ClInclude Include="pointCloudCombine.h" />
     <ClInclude Include="gl3w.h" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="glfw_wrapper.hpp" />
@@ -41,6 +44,7 @@
     <ClInclude Include="meshObject.h" />
     <ClInclude Include="mouseFunctions.h" />
     <ClInclude Include="octTree.h" />
+    <ClInclude Include="quickSort.h" />
     <ClInclude Include="randomHelper.h" />
     <ClInclude Include="robj.h" />
     <ClInclude Include="robjtogl.h" />

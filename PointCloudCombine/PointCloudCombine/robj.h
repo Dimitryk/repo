@@ -8,7 +8,7 @@
 #ifndef __robj_h_
 #define __robj_h_
 
-typedef struct obj_t_ *obj_p;
+typedef struct obj_t_* obj_p;
 
 obj_p openOBJ(char*);
 

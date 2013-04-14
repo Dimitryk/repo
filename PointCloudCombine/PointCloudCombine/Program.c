@@ -1,4 +1,4 @@
-#include "gl3w.h"
+﻿#include "gl3w.h"
 #include <GL\freeglut.h>
 #include <stdio.h>
 #include <math.h>
@@ -16,8 +16,6 @@
 
 GLSLprogram *gouraudShading;
 GLuint ppBuffer;
-GLuint ppMatrixBlock, modelToCameraMatrixUnif, normalModelToCameraMatrixUnif;
-GLuint ambientIntensityUnif, lightIntensityUnif, dirToLightUnif;
 
 static meshObject objectsArray[5];
 static int objectsCount = 0;
@@ -66,7 +64,6 @@ void genUniformBuffer(void){
 
 }
 
-
 static int loadPointMeshFile(void){
 	char fileName[256];
 	
@@ -101,10 +98,8 @@ void init(void){
 	glEnable(GL_DEPTH_CLAMP);
 
 	loadPointMeshFile();
-	loadPointMeshFile();
+	//loadPointMeshFile();
 }
-
-
 
 void display(void)
 {
@@ -112,8 +107,6 @@ void display(void)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 
 	gPushMatrix();
 	gTranslate3f(-position.x,-position.y,-position.z);
@@ -168,13 +161,15 @@ static void userPickTransform(GLint x, GLint y, float* vector, float* origo){
 	gMatrixVectorMultiply(inverseModelMatrix, vector, 4);
 	gMatrixVectorMultiply(inverseModelMatrix, origo, 4);
 }
-void selectSubMesh(float *v1, float *v2, float *origo){
+
+static void selectSubMesh(float *v1, float *v2, float *origo){
 	Vector3f min = {9999.0f,9999.0f,9999.0f}, max = {-9999.0f,-9999.0f,-9999.0f};
 	Vector3f minBound, maxBound;
 	float *testReturn;
 	float scale1, scale2, temp;
 	arrayListf *subMeshArray;
-	int i, objectIndex;
+	unsigned int i;
+	int objectIndex;
 	int subMeshCount = 0;
 
 	subMeshArray = createArrayListf();

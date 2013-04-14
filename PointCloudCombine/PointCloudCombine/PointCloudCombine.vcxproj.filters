@@ -45,9 +45,6 @@
     <ClCompile Include="arrayList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gMatrix.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="icp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,11 +75,17 @@
     <ClCompile Include="rply.c">
       <Filter>Source Files\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="meshObject.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="rplytogl.c">
       <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="meshObject.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="gMatrix.c">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="pointCloudCombine.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -134,11 +137,20 @@
     <ClInclude Include="GLSLprogram.h">
       <Filter>Header Files\GLSL</Filter>
     </ClInclude>
-    <ClInclude Include="meshObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="rplytogl.h">
       <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="quickSort.h">
+      <Filter>Header Files\MathHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="binarySearch.h">
+      <Filter>Header Files\MathHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="meshObject.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="pointCloudCombine.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,14 @@
 #ifndef __arrayList_h_
 #define __arrayList_h_
+/* Library for dynamic array handling
+ * 
+ */
+
 
 /* Linked List structure holding data of type float
+ * the structures are publicly visible 
  */
-typedef struct arrayListf_{
+typedef struct arrayListf_t{
 	int lenght;
 	int size;
 	int index;
@@ -11,7 +16,7 @@ typedef struct arrayListf_{
 }arrayListf;
 /* Linked List structure holding data of type int
  */
-typedef struct arrayListui_{
+typedef struct arrayListui_t{
 	int lenght;
 	int size;
 	int index;
@@ -33,11 +38,11 @@ int addToArrayListfv(arrayListf *list, float *vector, int size);
  */
 void deleteArrayListf(arrayListf *list);
 
-/* Functions for the arraylist contaning values in the type of int
- * formation reffer to the float part discription
+/* Functions for the arraylist contaning values in the type of unsigned int
+ * for information reffer to the float part discription
  */
 arrayListui * createArrayListui(void);
-int addToArrayListui(arrayListui *list, int data);
+int addToArrayListui(arrayListui *list, unsigned int data);
 int addToArrayListuiv(arrayListui *list, unsigned int *vector, int size);
 void deleteArrayListui(arrayListui *list);
 

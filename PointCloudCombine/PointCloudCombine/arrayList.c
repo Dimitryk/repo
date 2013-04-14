@@ -4,7 +4,7 @@
 
 #define INITDATASIZE 1024
 
-static int growArrayListf(arrayListf *list){
+static int growArrayListf(arrayListf* list){
 	list->data = (float*)realloc(list->data, sizeof(float) * (list->size * 2));
 	if(list->data == NULL)
 		return 0;
@@ -12,30 +12,26 @@ static int growArrayListf(arrayListf *list){
 	return 1;
 }
 
-int addToArrayListf(arrayListf *list, float data){
-	if(list->index >= list->size){
+int addToArrayListf(arrayListf* list, float data){
+	if(list->size <= list->lenght){
 		if(!growArrayListf(list))
 			return 0;
 		
 	}
-	list->data[list->index] = data;
-	list->index++;
-	list->lenght++;
+	list->data[list->lenght++] = data;
 	return 1;
 }
-int addToArrayListfv(arrayListf *list, float *vector, int size){
-	if(list->size <= list->index + size){
+int addToArrayListfv(arrayListf* list, float* vector, int size){
+	if(list->size <= list->lenght + size){
 		if(!growArrayListf(list))
 			return 0;
-		
 	}
-	memcpy(list->data + list->index, vector, sizeof(float) * size);
-	list->index += size;
+	memcpy(list->data + list->lenght, vector, sizeof(float) * size);
 	list->lenght += size;
 	return 1;
 }
 
-arrayListf * createArrayListf(void){
+arrayListf* createArrayListf(void){
 	arrayListf *newList;
 	newList = (arrayListf*)malloc(sizeof(arrayListf));
 	if(newList == NULL)
@@ -46,14 +42,17 @@ arrayListf * createArrayListf(void){
 	newList->size = INITDATASIZE;
 	newList->index = 0;
 	newList->lenght = 0;
+	return newList;
 }
 
 void deleteArrayListf(arrayListf *list){
-	free(list->data);
+	if(list->data != NULL)
+		free(list->data);
 	free(list);
 }
 
-static int growArrayListui(arrayListui *list){
+/* Unsigned integer functions */
+static int growArrayListui(arrayListui* list){
 	list->data = (unsigned int*)realloc(list->data, sizeof(unsigned int) * list->size * 2);
 	if(list->data == NULL)
 		return 0;
@@ -61,30 +60,25 @@ static int growArrayListui(arrayListui *list){
 	return 1;
 }
 
-int addToArrayListui(arrayListui *list, int data){
-	if(list->index >= list->size){
+int addToArrayListui(arrayListui* list, unsigned int data){
+	if(list->size <= list->lenght){
 		if(!growArrayListui(list))
 			return 0;
-		
 	}
-	list->data[list->index] = data;
-	list->index++;
-	list->lenght++;
+	list->data[list->lenght++] = data;
 	return 1;
 }
-int addToArrayListuiv(arrayListui *list, unsigned int *vector, int size){
-	if(list->size <= list->index + size){
+int addToArrayListuiv(arrayListui* list, unsigned int* vector, int size){
+	if(list->size <= list->lenght + size){
 		if(!growArrayListui(list))
 			return 0;
-		
 	}
-	memcpy(list->data + list->index, vector, sizeof(unsigned int) * size);
-	list->index += size;
+	memcpy(list->data + list->lenght, vector, sizeof(unsigned int) * size);
 	list->lenght += size;
 	return 1;
 }
 
-arrayListui * createArrayListui(void){
+arrayListui* createArrayListui(void){
 	arrayListui *newList;
 	newList = (arrayListui*)malloc(sizeof(arrayListui));
 	if(newList == NULL)
@@ -95,9 +89,11 @@ arrayListui * createArrayListui(void){
 	newList->size = INITDATASIZE;
 	newList->index = 0;
 	newList->lenght = 0;
+	return newList;
 }
 
-void deleteArrayListui(arrayListui *list){
-	free(list->data);
+void deleteArrayListui(arrayListui* list){
+	if(list->data != NULL)
+		free(list->data);
 	free(list);
 }
