@@ -8,7 +8,6 @@ GLSLprogram* createShaderProgram(char* vertexShaderFileName, char* fragmentShade
 	GLSLprogram *program;
 	GLSLshader vertexShader, fragmentShader;
 	GLint maxL;
-	char *err;
 
 	program = (GLSLprogram*)malloc(sizeof(GLSLprogram));
 	program->ID = glCreateProgram();

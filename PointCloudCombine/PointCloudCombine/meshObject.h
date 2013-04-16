@@ -7,7 +7,7 @@
 typedef struct meshObject_t{
 	GLuint vertexBuffer, colorBuffer, elementBuffer, normalsBuffer;
 	GLuint vao;
-	GLfloat *vertexArray, *normalsArray;
+	GLfloat *vertexArray, *normalsArray, *colorArray;
 	GLuint *elementArray;
 	unsigned int vertexCount, elementCount;
 	GLSLprogram *shaderProgram;
@@ -19,6 +19,8 @@ typedef struct meshObject_t{
  * shaderProgram: Program that will be used to render the mesh object
  */
 meshObject* createMeshObject(char* filename, GLSLprogram* shaderProgram);
+
+void meshObjectUpdateColorBuffer(meshObject* object);
 
 /* Changes GLSL program pointer that will be used to render the mesh object
  */

@@ -34,6 +34,7 @@ int openOBJ_file(char* filename){
 		elementDataList->index = 0;
 		elementDataList->lenght = 0;
 	}
+	return 1;
 }
 
 void createVertexArrayOBJ(GLfloat **vertexArray, int *size){
@@ -51,6 +52,8 @@ static int arrayListftoGLfloat(arrayListf *list, GLfloat **dst){
 	if(sizeof(float)!=sizeof(GLfloat))
 		return 0;
 	*dst = (GLfloat*)malloc(sizeof(GLfloat) * list->lenght);
+	if( *dst == NULL )
+		return 0;
 	memcpy(*dst, list->data, sizeof(GLfloat) * list->lenght);
 	return 1;
 }
@@ -59,6 +62,8 @@ static int arrayListuitoGLuint(arrayListui *list, GLuint **dst){
 	if(sizeof(unsigned int)!=sizeof(GLuint))
 		return 0;
 	*dst = (GLuint*)malloc(sizeof(GLuint) * list->lenght);
+	if( *dst == NULL )
+		return 0;
 	memcpy(*dst, list->data, sizeof(unsigned int) * list->lenght);
 	return 1;
 }
@@ -77,11 +82,15 @@ static void cleanrobj(void){
 int readOBG_file(void){
 	if(!readOBJ(obj))
 		return 0;
-	if(!arrayListftoGLfloat(vertexDataList, outputVertexArray))
+	if(!arrayListftoGLfloat(vertexDataList, outputVertexArray)){
+		cleanrobj();
 		return 0;
+	}
 	*vertexCount = vertexDataList->lenght;
-	if(!arrayListuitoGLuint(elementDataList, outputElementArray))
+	if(!arrayListuitoGLuint(elementDataList, outputElementArray)){
+		cleanrobj();
 		return 0;
+	}
 	*elementCount = elementDataList->lenght;
 	cleanrobj();
 	return closeOBJ(obj);

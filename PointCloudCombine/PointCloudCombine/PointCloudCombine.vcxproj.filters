@@ -87,6 +87,9 @@
     <ClCompile Include="pointCloudCombine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="globalVariables.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kdTree.h">
@@ -152,12 +155,18 @@
     <ClInclude Include="pointCloudCombine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="globalVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\PointCloud\PointCloud\fragmentShaderSource.frag">
+    <None Include="fragmentShaderSource.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\PointCloud\PointCloud\vertexShaderSource.vert">
+    <None Include="vertexShaderSource.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="toClipSpace.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

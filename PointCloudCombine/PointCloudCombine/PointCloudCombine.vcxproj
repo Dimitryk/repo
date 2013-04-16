@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="arrayList.c" />
+    <ClCompile Include="globalVariables.c" />
     <ClCompile Include="pointCloudCombine.c" />
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="GLSLprogram.c" />
@@ -32,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="arrayList.h" />
     <ClInclude Include="binarySearch.h" />
+    <ClInclude Include="globalVariables.h" />
     <ClInclude Include="pointCloudCombine.h" />
     <ClInclude Include="gl3w.h" />
     <ClInclude Include="glcorearb.h" />
@@ -53,8 +55,9 @@
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\PointCloud\PointCloud\fragmentShaderSource.frag" />
-    <None Include="..\..\PointCloud\PointCloud\vertexShaderSource.vert" />
+    <None Include="fragmentShaderSource.frag" />
+    <None Include="toClipSpace.vert" />
+    <None Include="vertexShaderSource.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F79B7578-2C4D-463A-A72E-C6443F2ED59E}</ProjectGuid>

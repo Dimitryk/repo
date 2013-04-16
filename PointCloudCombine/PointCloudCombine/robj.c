@@ -45,22 +45,22 @@ void setFace_cb(obj_p obj, int (faceFunction)(unsigned int* vertexIndex, unsigne
 
 static void parseVertex(obj_p obj){
 	float data[3];
-	data[0] = atof( strtok(NULL, WHITESPACE) );
-	data[1] = atof( strtok(NULL, WHITESPACE) );
-	data[2] = atof( strtok(NULL, WHITESPACE) );
+	data[0] = (float)atof( strtok(NULL, WHITESPACE) );
+	data[1] = (float)atof( strtok(NULL, WHITESPACE) );
+	data[2] = (float)atof( strtok(NULL, WHITESPACE) );
 	obj->vertexData_cb(data, 3);
 }
 static void parseNormal(obj_p obj){
 	float data[3];
-	data[0] = atof( strtok(NULL, WHITESPACE) );
-	data[1] = atof( strtok(NULL, WHITESPACE) );
-	data[2] = atof( strtok(NULL, WHITESPACE) );
+	data[0] = (float)atof( strtok(NULL, WHITESPACE) );
+	data[1] = (float)atof( strtok(NULL, WHITESPACE) );
+	data[2] = (float)atof( strtok(NULL, WHITESPACE) );
 	obj->normalData_cb(data, 3);
 }
 static void parseTexture(obj_p obj){
 	float data[2];
-	data[0] = atof( strtok(NULL, WHITESPACE) );
-	data[1] = atof( strtok(NULL, WHITESPACE) );
+	data[0] = (float)atof( strtok(NULL, WHITESPACE) );
+	data[1] = (float)atof( strtok(NULL, WHITESPACE) );
 	obj->textureData_cb(data, 2);
 }
 static void parseFace(obj_p obj){

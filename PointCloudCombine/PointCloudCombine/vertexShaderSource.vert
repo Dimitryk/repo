@@ -2,6 +2,7 @@
 
 layout(location = 0) in vec3 position;
 layout(location = 2) in vec3 normal;
+layout(location = 1) in vec4 color;
 
 smooth out vec4 interpColor;
 
@@ -26,5 +27,5 @@ void main()
 	float cosAngIncidence = dot(normCamSpace, dirToLight);
 	cosAngIncidence = clamp(cosAngIncidence, 0, 1);
 	
-	interpColor = (lightIntensity * cosAngIncidence) + ambientIntensity;
+	interpColor = ((lightIntensity ) * cosAngIncidence) + ambientIntensity + color;
 }

@@ -70,10 +70,10 @@ void setIdentity(float *matrix){
 
 void gRotate3f(float rotationAngle, float vX, float vY, float vZ){
 	float quaterionRotationMatrix[16];
-	float cosA = cos(rotationAngle / 180.0f * M_PI);
+	float cosA = (float)cos(rotationAngle / 180.0f * M_PI);
 	float oneC = 1 - cosA;
-	float sinA = sin(rotationAngle / 180.0f * M_PI);
-	float axisVectLength = sqrt(vX*vX + vY*vY + vZ*vZ);
+	float sinA = (float)sin(rotationAngle / 180.0f * M_PI);
+	float axisVectLength = (float)sqrt(vX*vX + vY*vY + vZ*vZ);
 	float ux = vX/axisVectLength;
 	float uy = vY/axisVectLength;
 	float uz = vZ/axisVectLength;
@@ -95,10 +95,10 @@ void gRotate3f(float rotationAngle, float vX, float vY, float vZ){
 
 void gRotate2fv(float rotationAngle, float* p1, float* p2){
 	float quaterionRotationMatrix[16];
-	float cosA = cos(rotationAngle / 180.0f * M_PI);
+	float cosA = (float)cos(rotationAngle / 180.0f * M_PI);
 	float oneC = 1 - cosA;
-	float sinA = sin(rotationAngle / 180.0f * M_PI);
-	float axisVectLength = sqrt((p2[0]-p1[0])*(p2[0]-p1[0])
+	float sinA = (float)sin(rotationAngle / 180.0f * M_PI);
+	float axisVectLength = (float)sqrt((p2[0]-p1[0])*(p2[0]-p1[0])
 								+ (p2[1]-p1[1])*(p2[1]-p1[1]) 
 								+ (p2[2]-p1[2])*(p2[2]-p1[2]));
 	float ux = (p2[0]-p1[0])/axisVectLength;

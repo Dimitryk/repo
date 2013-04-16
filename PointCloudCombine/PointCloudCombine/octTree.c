@@ -265,6 +265,10 @@ octTree_p createOctTree(	Vector3f minBound, Vector3f maxBound,
 	return tree;
 }
 
+octTreeNode_p getRootOctTree(octTree_p tree){
+	return tree->root;
+}
+
 Vector3f getNodeMinBound(octTreeNode_p node){
 	return node->minCoordinates;
 }
