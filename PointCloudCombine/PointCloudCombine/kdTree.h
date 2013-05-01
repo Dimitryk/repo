@@ -1,5 +1,5 @@
-#ifndef __kdTree_h_
-#define __kdTree_h_
+#ifndef __kdTree_h
+#define __kdTree_h
 
 #define DIMENSIONS 3
 #define TYPE float
@@ -13,6 +13,7 @@ kdTree_p createKD_Tree(float* data, int size);
  */
 float* closestPnt(kdTree_p, float* point, float* distance);
 
-void deleteKD_Tree(kdTree_p tree);
+float** kdTree_KNN(kdTree_p tree, float** kNearestsPoints, float* point, int k, float maxSQDistance);
 
+void deleteKD_Tree(kdTree_p tree);
 #endif

@@ -8,6 +8,13 @@ typedef struct t_vector3f_ {
 	GLfloat z;
 } Vector3f;
 
+typedef struct t_vector3d_ {
+	double x;
+	double y;
+	double z;
+} Vector3d;
+
+
 typedef struct t_vector3ui_ {
 	GLuint x;
 	GLuint y;

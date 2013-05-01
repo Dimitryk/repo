@@ -12,7 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="arrayList.c" />
-    <ClCompile Include="globalVariables.c" />
+    <ClCompile Include="greedyTriangulation.c" />
+    <ClCompile Include="objectGeometryMeshConverter.c" />
     <ClCompile Include="pointCloudCombine.c" />
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="GLSLprogram.c" />
@@ -33,7 +34,10 @@
   <ItemGroup>
     <ClInclude Include="arrayList.h" />
     <ClInclude Include="binarySearch.h" />
+    <ClInclude Include="geometryMesh.h" />
     <ClInclude Include="globalVariables.h" />
+    <ClInclude Include="greedyTriangulation.h" />
+    <ClInclude Include="objectGeometryMeshConverter.h" />
     <ClInclude Include="pointCloudCombine.h" />
     <ClInclude Include="gl3w.h" />
     <ClInclude Include="glcorearb.h" />

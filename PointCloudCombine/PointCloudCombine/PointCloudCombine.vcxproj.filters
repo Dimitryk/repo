@@ -87,8 +87,11 @@
     <ClCompile Include="pointCloudCombine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globalVariables.c">
+    <ClCompile Include="greedyTriangulation.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objectGeometryMeshConverter.c">
+      <Filter>Source Files\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +160,15 @@
     </ClInclude>
     <ClInclude Include="globalVariables.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="greedyTriangulation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="geometryMesh.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="objectGeometryMeshConverter.h">
+      <Filter>Header Files\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

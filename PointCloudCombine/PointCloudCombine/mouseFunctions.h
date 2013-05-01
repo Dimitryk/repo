@@ -1,15 +1,20 @@
 #ifndef __mouseFunctions_h_
 #define __mouseFunctions_h_
 
-#include "vector.h"
+/* Header for mouse functions 
+ * This header is strongly dependent on global variables as it can be seen as extention of Program.c file
+ * TODO encapsulate window dependent variables to reduce dependency and suport multi threading (multi window)
+ */
 #include "globalVariables.h"
 
-void mouseMoveFunction(GLint x, GLint y, Vector3f *positionVector, float *rotationMatrix);
-void mouseFunction(int button, int action, int x, int y);
-void mouseZoomFnc(GLint dir, Vector3f *positionVector);
+/* FreeGlut function callback for mouse wheel */
+void mouseWheelFnc(GLint button, GLint dir, GLint x, GLint y);
 
-void userPickVectors(		float* edges, 
-							float* v1, float* v2, float* v3, float* v4,
-							float* origo);
+/* Glut function callback for mouse clicks */
+void mouseFcn(GLint button, GLint action, GLint x, GLint y);
+
+/* Glut function callback for mouse movement */
+void mouseMoveFnc(GLint x, GLint y);
+
 
 #endif

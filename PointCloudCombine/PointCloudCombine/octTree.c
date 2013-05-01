@@ -2,12 +2,12 @@
 #include <math.h>
 #include "octTree.h"
 
-#define octTreeXmidPoint(node) (node->minCoordinates.x + (node->maxCoordinates.x - node->minCoordinates.x) / 2)
-#define octTreeYmidPoint(node) (node->minCoordinates.y + (node->maxCoordinates.y - node->minCoordinates.y) / 2)
-#define octTreeZmidPoint(node) (node->minCoordinates.z + (node->maxCoordinates.z - node->minCoordinates.z) / 2)
+#define octTreeXmidPoint(node) (node->minCoordinates.x + ((node->maxCoordinates.x - node->minCoordinates.x) / 2))
+#define octTreeYmidPoint(node) (node->minCoordinates.y + ((node->maxCoordinates.y - node->minCoordinates.y) / 2))
+#define octTreeZmidPoint(node) (node->minCoordinates.z + ((node->maxCoordinates.z - node->minCoordinates.z) / 2))
 
-#define getQuadrant(root, point) (((point[0] > octTreeXmidPoint(root)) ? 1 : 0 )+\
-	((point[1] > octTreeZmidPoint(root)) ? 2 : 0) + ((point[2] > octTreeYmidPoint(root)) ? 4 : 0))
+//#define getQuadrant(root, point) (((point[0] > octTreeXmidPoint(root)) ? 1 : 0 )+\
+//	((point[2] > octTreeZmidPoint(root)) ? 2 : 0) + ((point[1] > octTreeYmidPoint(root)) ? 4 : 0))
 
 #define SQ(x) ((x) * (x))
 #define SQDistance3D(a,b,c) (SQ(a) + SQ(b) + SQ(c))
@@ -20,6 +20,7 @@
 	min(distance(node->minCoordinates.y,point[1]),distance(node->maxCoordinates.y,point[1])),\
 	min(distance(node->minCoordinates.z,point[2]),distance(node->maxCoordinates.z,point[2]))))
 #define pntToPntDistance(a,b) (euclideanDistance(distance((a)[0],(b)[0]),distance((a)[1],b[1]),distance((a)[2],(b)[2])))
+
 
 /* A node struct 
  * Each node in the tree has it diamentions set by bounds
@@ -49,16 +50,17 @@ static octNodeStack* createNodeStack(int size){
 	if(stack == NULL)
 		return NULL;
 	stack->nodeList = (octTreeNode*)malloc(sizeof(octTreeNode) * size);
-	if(stack->nodeList == NULL)
+	if(stack->nodeList == NULL){
 		free(stack);
 		return NULL;
+	}
 	stack->size = size;
 	stack->stackPosition = 0;
 	return stack;
 }
 static octTreeNode* getNewOctNodev(octNodeStack* stack, int size){
 	octTreeNode *temp;
-	if((stack->stackPosition + size) >= stack->size)
+	if((stack->stackPosition + size) > stack->size)
 		return NULL;
 	temp = stack->nodeList + stack->stackPosition;
 	stack->stackPosition += size;
@@ -186,21 +188,6 @@ static int setNodeChildren(octTreeNode *current, octNodeStack* stack, int depth)
 	return 1;
 }
 
-//int octTreeAddPoint(octTreeNode *root, float *data){
-//	int position = 0;
-//	if(root->children == NULL){
-//		if(root->pointDataList == NULL){
-//			root->pointDataList = createArrayListf();
-//			return addToArrayListfv(root->pointDataList, data, 3);
-//		}else
-//			return addToArrayListfv(root->pointDataList, data, 3);
-//	}
-//	position += (data[0] > octTreeXmidPoint(root)) ? 1 : 0 ;
-//	position += (data[2] > octTreeZmidPoint(root)) ? 2 : 0 ;
-//	position += (data[1] > octTreeYmidPoint(root)) ? 4 : 0 ;
-//	return octTreeAddPoint(root->children + position, data);
-//}
-
 static int pruneOctTree(octTreeNode* root){
 	int numberValidChildren = 0;
 	if(root->children != NULL){
@@ -223,21 +210,14 @@ static int pruneOctTree(octTreeNode* root){
 	return -1;
 }
 
-//int createOctTree(octTreeNode *root, Vector3f minBound, Vector3f maxBound, float *pointData, int arraySize, int depth){
-//	float *dataEndPntr;
-//	root->minCoordinates = minBound;
-//	root->maxCoordinates = maxBound;
-//	if(!setNodeChildren(root, depth))
-//		return 0;
-//	for(dataEndPntr = pointData + arraySize; pointData < dataEndPntr; pointData += 3){
-//		{
-//			if(!octTreeAddPoint(root, pointData))
-//				return 0;
-//		}
-//	}
-//	//pruneOctTree(root);
-//	return 1;
-//}
+static int calculateNumberNodes( int depth ){
+	int i, numberNodes = 1;
+
+	for( i = 1; i <= depth; i++) {
+		numberNodes += (int)pow(8.0, i);
+	}
+	return numberNodes;
+}
 
 octTree_p createOctTree(	Vector3f minBound, Vector3f maxBound, 
 							void* pointData, int arraySize, 
@@ -249,8 +229,10 @@ octTree_p createOctTree(	Vector3f minBound, Vector3f maxBound,
 
 	tree = (octTree*)malloc(sizeof(octTree));
 
-	tree->stack = createNodeStack((int)pow(8, depth) + 1);
-	
+	tree->stack = createNodeStack(calculateNumberNodes(depth));
+	if(tree->stack == NULL)
+		return NULL;
+
 	tree->root = getNewOctNodev(tree->stack, 1);
 	tree->root->minCoordinates = minBound;
 	tree->root->maxCoordinates = maxBound;
@@ -279,7 +261,6 @@ Vector3f getNodeMaxBound(octTreeNode_p node){
 octTreeNode_p getNodesChildren(octTreeNode_p node){
 	return node->children;
 }
-
 octTreeNode_p getNodesChild(octTreeNode_p node, int index){
 	return node->children + index;
 }
@@ -287,13 +268,12 @@ octTreeNode_p getNodesChild(octTreeNode_p node, int index){
 void* getNodesDataPntr(octTreeNode_p node){
 	return node->dataList;
 }
-
 void setNodesDataPntr(octTreeNode_p node, void* pntr){
 	node->dataList = pntr;
 }
 
 int addDataOctTree(octTree_p tree, void* data, int size){
-	return tree->addDataFnc(tree->root, data, size);
+	return (tree->addDataFnc != NULL) ? tree->addDataFnc(tree->root, data, size) : 0;
 }
 
 /* Returns NULL if no closer point is found
@@ -345,10 +325,24 @@ static float* clsPntInList(float* data, int size, float* point, float* distance)
 //	*distance = 1000000.0f;//should be float.max
 //	return recFindClsPntToPnt(root, point, distance);
 //}
+int nodeInDistance(octTreeNode* root, float* point, float maxDistance){
+
+	if( (root->minCoordinates.x - maxDistance)< point[0] && point[0] < (root->maxCoordinates.x + maxDistance) &&
+		(root->minCoordinates.y - maxDistance)< point[1] && point[1] < (root->maxCoordinates.y + maxDistance) &&
+		(root->minCoordinates.z - maxDistance)< point[2] && point[2] < (root->maxCoordinates.z + maxDistance) )
+		return 1;
+
+	return 0;
+}
 
 int rayOctreeIntersept(octTreeNode* root, float* ray, float* origin, float maxSqDistance){
-	float tmax, tmin;
-	Vector3f maxRayLength, minRayLength, tmaxPoint, tminPoint, rayDirection, rayOrigin;
+	double tmax, tmin;
+	Vector3d maxRayLength, minRayLength, tmaxPoint, tminPoint, rayDirection, rayOrigin;
+
+	if( root->minCoordinates.x < origin[0] && origin[0] < root->maxCoordinates.x &&
+		root->minCoordinates.y < origin[1] && origin[1] < root->maxCoordinates.y &&
+		root->minCoordinates.z < origin[2] && origin[2] < root->maxCoordinates.z )
+		return 1;
 
 	rayDirection.x = ray[0];
 	rayDirection.y = ray[1];
@@ -401,7 +395,7 @@ int rayOctreeIntersept(octTreeNode* root, float* ray, float* origin, float maxSq
 		maxRayLength.z = rayDirection.z * tmax;
 		if( SQDistance3Dv(maxRayLength) < maxSqDistance ){
 			tmaxPoint.x = rayOrigin.x + maxRayLength.x;
-			tmaxPoint.z = rayOrigin.z + maxRayLength.y;
+			tmaxPoint.z = rayOrigin.z + maxRayLength.z;
 			if(		(root->minCoordinates.x < tmaxPoint.x) && (tmaxPoint.x < root->maxCoordinates.x)
 				&&	(root->minCoordinates.z < tmaxPoint.z) && (tmaxPoint.z < root->maxCoordinates.z) ){
 					return 1;

@@ -92,6 +92,14 @@ arrayListui* createArrayListui(void){
 	return newList;
 }
 
+int hasNextArrayListui(arrayListui* list){
+	return (list->index < list->lenght);
+}
+
+unsigned int* getNextArrayListui(arrayListui* list){
+	return list->data + (list->index++);
+}
+
 void deleteArrayListui(arrayListui* list){
 	if(list->data != NULL)
 		free(list->data);

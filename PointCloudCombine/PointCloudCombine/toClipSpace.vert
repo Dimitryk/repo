@@ -1,5 +1,7 @@
 #version 330
-
+/* Simple shader to draw directly to the clip space
+ * With constant color
+ */
 layout(location = 0) in vec2 position;
 
 smooth out vec4 interpColor;

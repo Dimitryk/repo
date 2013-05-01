@@ -6,9 +6,7 @@
 #include "gMatrix.h"
 #include "vector.h"
 
-/* Calculates surface Normal of a triangle
- * NB returned normal is not of unit length
- */
+/* Calculates surface Normal of a triangle */
 static Vector3f calculateNormal(GLfloat triagleVertexArray[]){
 	Vector3f Normal; 
 	GLfloat l;
@@ -163,9 +161,15 @@ meshObject* createMeshObject(char* fileName, GLSLprogram* shaderProgram){
 	for(tolken = fileName; *tolken && *tolken != '.'; tolken++);
 	tolken++;
 	if(strcmp(tolken, "ply") == 0){
-		loadPLY(object, fileName);
+		if( !loadPLY(object, fileName )){
+			free(object);
+			return NULL;
+		}
 	}else if(strcmp(tolken, "obj") == 0){
-		loadOBJ(object, fileName);
+		if( !loadOBJ(object, fileName)){
+			free(object);
+			return NULL;
+		}
 	}else{
 		//TODO error handling;
 		//deleteMeshObject(object);

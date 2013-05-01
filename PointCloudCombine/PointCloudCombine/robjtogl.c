@@ -20,6 +20,8 @@ static int fillElementDataList(unsigned int *vertexIndex,unsigned int *texturein
 
 int openOBJ_file(char* filename){
 	obj = openOBJ(filename);
+	if( obj == NULL )
+		return 0;
 	if(vertexDataList == NULL)
 		vertexDataList = createArrayListf();
 	else
@@ -71,6 +73,7 @@ static int arrayListuitoGLuint(arrayListui *list, GLuint **dst){
 static void cleanrobj(void){
 	arrayListf *tempVertexList;
 	arrayListui *tempElementList;
+
 	tempVertexList = vertexDataList;
 	vertexDataList = NULL;
 	deleteArrayListf(tempVertexList);

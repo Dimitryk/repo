@@ -20,8 +20,10 @@ obj_p openOBJ(char* fileName){
 	obj_t *obj;
 	obj = (obj_t*)malloc(sizeof(obj_t));
 	obj->fp = fopen(fileName, "rb");
-	if (obj->fp == NULL) /* Return NULL on failure */
-        return NULL;
+	if (obj->fp == NULL){ /* Return NULL on failure */
+        free(obj);
+		return NULL;
+	}
 	obj->vertexData_cb = NULL;
 	obj->textureData_cb = NULL;
 	obj->textureData_cb = NULL;
@@ -151,5 +153,6 @@ int readOBJ(obj_p obj){
 	return 1;
 }
 int closeOBJ(obj_p obj){
-	return fclose(obj->fp);
+	fclose(obj->fp);
+	return 1;
 }

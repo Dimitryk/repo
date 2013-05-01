@@ -47,6 +47,8 @@ int addDataOctTree(octTree_p tree, void* data, int size);
 
 int rayOctreeIntersept(octTreeNode_p root, float* ray, float* origin, float maxSqDistance);
 
+int nodeInDistance(octTreeNode_p root, float* point, float maxSQDistance);
+
 /* Frees all the allocated memmory for the root node and all sub nodes
  * including Data lists by user providen delete-function in creation prosses
  */

@@ -5,27 +5,40 @@
 #include "GLSLprogram.h"
 #include "meshObject.h"
 #include "vector.h"
+#include "arrayList.h"
 
 #define fzFar 2000.0f
 #define fzNear 1.5f
 #define near_height 1.0f
+#define MAX_OBJECTS 5
 
+/* struct for drawing a rectangular selection on the screen 
+ * TODO Separate the Struct and the methods from the Program.c to separete file/header
+ * and suport multy object if needed
+ */
 struct {
+	GLfloat edgeArray[8];
 	GLSLprogram *simpleProgram;
 	GLuint edgeBuffer;
 	GLuint recVOA;
-	GLfloat edgeArray[8];
+	GLint updated;
 } wireRect;
 
-float pickV1[4], pickV2[4], pickV3[4], pickV4[4], pickOrigo[4];
-GLint shiftButtonDown;
-meshObject objectsArray[5];
-float ppMatrix[16], orientationMatrix[16];
+/* Array of objects to operate on in the program */
+meshObject objectsArray[MAX_OBJECTS];
+GLfloat ppMatrix[16], orientationMatrix[16];
 Vector3f position;
-int window_height, window_width;
+GLfloat aspect;
+GLint shiftButtonDown;
+GLint window_height, window_width;
+arrayListf *userDefinedSegmentVertex;
+arrayListf *userDefinedSegmentNormals;
+/* Number og objects int the program */
 int objectsCount;
-float aspect;
 
-
+/* TODO move with struct */
+void wireRectUpdateBuffer(void);
+void initWireRecEdges(int x, int y);
+void updateWireRecEdges(int x, int y);
 
 #endif
