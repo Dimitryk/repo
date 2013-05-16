@@ -194,6 +194,35 @@ meshObject* createMeshObject(char* fileName, GLSLprogram* shaderProgram){
 	return object;
 }
 
+meshObject* meshObjectFromGeometry(geometryMesh* mesh, GLSLprogram* shaderProgram){
+	meshObject *object;
+
+	object = (meshObject*)malloc(sizeof(meshObject));
+
+	object->vertexArray = mesh->vertexArray;
+	object->vertexCount = mesh->vertexCount;
+	object->elementArray = mesh->elementArray;
+	object->elementCount = mesh->elementCount;
+
+	object->normalsArray = mesh->normalsArray;
+	/*if(!createNormArray(object)){
+		free(object->elementArray);
+		free(object->vertexArray);
+		return NULL;
+	}*/
+
+	object->colorArray = (float*)calloc((object->vertexCount / 3 * 4), sizeof(float));
+	if( object->colorArray == NULL ){
+		deleteMeshObject(object);
+		return NULL;
+	}
+	//fillColor(object->colorArray, object->vertexCount / 3 * 4);
+	genBuffers(object);
+	object->shaderProgram = shaderProgram;
+	bindVOA(object);
+	return object;
+}
+
 void meshObjectChangeShaderProgram(meshObject* object, GLSLprogram* shaderProgram){
 	object->shaderProgram = shaderProgram;
 }
@@ -223,7 +252,26 @@ void drawMeshObject(meshObject* object){
 	glUseProgram(0);
 }
 
+void unBindBuffers(meshObject* object){
+	glBindBuffer(GL_ARRAY_BUFFER, object->colorBuffer);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, object->vertexBuffer);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, object->normalsBuffer);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &(object->colorBuffer));
+	glDeleteBuffers(1, &(object->vertexBuffer));
+	glDeleteBuffers(1, &(object->normalsBuffer));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object->elementBuffer);
+	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &(object->elementBuffer));
+}
+
 void deleteMeshObject(meshObject* object){
+	unBindBuffers(object);
 	if(object->elementArray != NULL)
 		free(object->elementArray);
 	if(object->normalsArray != NULL)

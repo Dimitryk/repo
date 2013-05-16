@@ -21,10 +21,10 @@ int binarySearchf(float value, float* list, int size){
 	return -1;
 }
 
-int binarySearchi(int value, int* list, int size){
-	int *midPntr;
-	int *startPntr = list; 
-	int *endPntr = list + size;
+int binarySearchui(unsigned int value, unsigned int* list, int size, int* position){
+	unsigned int *midPntr;
+	unsigned int *startPntr = list; 
+	unsigned int *endPntr = list + size;
 	while(startPntr < endPntr){
 		size /= 2; 
 		midPntr = startPntr + size;
@@ -35,6 +35,7 @@ int binarySearchi(int value, int* list, int size){
 	}
 	if ((endPntr == startPntr) && (*endPntr == value))
 		return endPntr - list;
+	*position = endPntr - list;
 	return -1;
 }
 

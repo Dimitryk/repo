@@ -113,7 +113,7 @@ static void userPickVectors(float* edges,
 /* Selects a Submesh contaning all points, from all mesh objects, that are inside a frustum, 
  * frustum is given by 6 planes defined by 4x vectors, origo and near, and far distance
  */
-static void selectSubMeshFrustum(	arrayListf* subMeshVertex, arrayListf* subMeshNormals,
+static void selectSubMeshFrustum(	arrayListf* subMeshVertex, arrayListui* colorIndexList,
 									float* v1, float* v2, 
 									float* v3, float* v4,
 									float* origo, float maxDistance){
@@ -121,8 +121,8 @@ static void selectSubMeshFrustum(	arrayListf* subMeshVertex, arrayListf* subMesh
 	float p1[3], p2[3], p3[3];
 	float vector1[3], vector2[3];
 	float d1, d2, d3, d4, dNear, dFar;
+	meshObject *object = objectsArray[0];// *endPntr;
 	int index;
-	meshObject *object = objectsArray, *endPntr;
 	float *vertexArray;
 	float *vertexEnd;
 	
@@ -175,28 +175,29 @@ static void selectSubMeshFrustum(	arrayListf* subMeshVertex, arrayListf* subMesh
 	add3v(p2, v4, origo);
 	dNear = (normNear[0]*p2[0] + normNear[1]*p2[1] + normNear[2]*p2[2]) * -1;
 
-	subMeshVertex->lenght = 0;
-	subMeshNormals->lenght = 0;
+	colorIndexes(objectsArray[0], userDefinedSegmentColor, reverseMarkingColor);
+	//meshObjectUpdateColorBuffer(objectsArray);
 
-	for( endPntr = object + objectsCount; object < endPntr; object++ ){
-		vertexArray = object->vertexArray;
-		for( vertexEnd = vertexArray + object->vertexCount; vertexArray < vertexEnd; vertexArray += 3 ){
-			if(	distanceToPlane(normFar, dFar, vertexArray) > 0 || 
-				distanceToPlane(normNear, dNear, vertexArray) > 0 ||
-				distanceToPlane(normPl1, d1, vertexArray) > 0 ||
-				distanceToPlane(normPl2, d2, vertexArray) > 0 ||
-				distanceToPlane(normPl3, d3, vertexArray) > 0 ||
-				distanceToPlane(normPl4, d4, vertexArray) > 0)
-					continue;
-			/* the point is inside the Fustrum */
-			addToArrayListfv(subMeshVertex, vertexArray, 3);
-			addToArrayListfv(subMeshNormals, object->normalsArray + (vertexArray - object->vertexArray), 3);
-			/*index = (vertexArray - object->vertexArray) / 3 * 4;
-			object->colorArray[index + 1] = -0.7f;
-			object->colorArray[index + 2] = -0.7f;*/
-		}
-		/*meshObjectUpdateColorBuffer(object);*/
+	subMeshVertex->lenght = 0;
+	colorIndexList->lenght = 0;
+
+	vertexArray = object->vertexArray;
+	for( vertexEnd = vertexArray + object->vertexCount; vertexArray < vertexEnd; vertexArray += 3 ){
+		if(	distanceToPlane(normFar, dFar, vertexArray) > 0 || 
+			distanceToPlane(normNear, dNear, vertexArray) > 0 ||
+			distanceToPlane(normPl1, d1, vertexArray) > 0 ||
+			distanceToPlane(normPl2, d2, vertexArray) > 0 ||
+			distanceToPlane(normPl3, d3, vertexArray) > 0 ||
+			distanceToPlane(normPl4, d4, vertexArray) > 0)
+			continue;
+		/* the point is inside the Fustrum */
+		addToArrayListfv(subMeshVertex, vertexArray, 3);
+		index = (vertexArray - object->vertexArray) / 3 * 4;
+		addToArrayListui(colorIndexList, (unsigned int)index);
 	}
+	colorIndexes(objectsArray[0], userDefinedSegmentColor, markingColor);
+	meshObjectUpdateColorBuffer(object);
+
 }
 
 static void mouseFunction(GLint button, GLint action, GLint x, GLint y)
@@ -290,7 +291,7 @@ static void selectSubMesh(float *v1, float *v2, float *origo){
 
 	subMeshArray = createArrayListf();
 	for(objectIndex = 0; objectIndex < objectsCount; objectIndex++){
-		meshObject currentObject = objectsArray[objectIndex];
+		meshObject currentObject = *(objectsArray[objectIndex]);
 		
 		float *vertexArray = currentObject.vertexArray;
 		
@@ -334,7 +335,7 @@ static void selectSubMesh(float *v1, float *v2, float *origo){
 					subMeshCount+=3;
 			}
 		}
-	meshObjectUpdateColorBuffer(objectsArray + objectIndex);
+	meshObjectUpdateColorBuffer(objectsArray[objectIndex]);
 	}
 	if(subMeshCount>0){
 		glutPostRedisplay();
@@ -349,11 +350,12 @@ void mouseFcn(GLint button, GLint action, GLint x, GLint y)
 		if(action == GLUT_DOWN){
 			initWireRecEdges(x, y);
 			wireRectUpdateBuffer();
+
 			glutPostRedisplay();
 		}else if(action == GLUT_UP){
 			if(wireRect.updated){
 				userPickVectors(wireRect.edgeArray, pickV1, pickV2, pickV3, pickV4, pickOrigo);
-				selectSubMeshFrustum(userDefinedSegment, pickV1, pickV2, pickV3, pickV4, pickOrigo, 100.0f);
+				selectSubMeshFrustum(userDefinedSegmentVertex, userDefinedSegmentColor, pickV1, pickV2, pickV3, pickV4, pickOrigo, 200.0f);
 				glutPostRedisplay();
 			}
 		}

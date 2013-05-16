@@ -25,14 +25,15 @@ struct {
 } wireRect;
 
 /* Array of objects to operate on in the program */
-meshObject objectsArray[MAX_OBJECTS];
+meshObject **objectsArray;
 GLfloat ppMatrix[16], orientationMatrix[16];
 Vector3f position;
 GLfloat aspect;
 GLint shiftButtonDown;
 GLint window_height, window_width;
 arrayListf *userDefinedSegmentVertex;
-arrayListf *userDefinedSegmentNormals;
+arrayListui *userDefinedSegmentColor;
+float markingColor[4], reverseMarkingColor[4];
 /* Number og objects int the program */
 int objectsCount;
 
@@ -40,5 +41,7 @@ int objectsCount;
 void wireRectUpdateBuffer(void);
 void initWireRecEdges(int x, int y);
 void updateWireRecEdges(int x, int y);
+
+void colorIndexes( meshObject* obj, arrayListui* list, float* color );
 
 #endif

@@ -2,6 +2,7 @@
 #define __meshObject_h_
 #include "gl3w.h"
 #include "GLSLprogram.h"
+#include "geometryMesh.h"
 
 //TODO make meshObject opaque and provide vital get set methods
 typedef struct meshObject_t{
@@ -19,6 +20,8 @@ typedef struct meshObject_t{
  * shaderProgram: Program that will be used to render the mesh object
  */
 meshObject* createMeshObject(char* filename, GLSLprogram* shaderProgram);
+
+meshObject* meshObjectFromGeometry(geometryMesh* mesh, GLSLprogram* shaderProgram);
 
 void meshObjectUpdateColorBuffer(meshObject* object);
 

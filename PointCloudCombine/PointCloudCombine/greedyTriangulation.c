@@ -5,7 +5,7 @@
 
 
 #define EDGE_SLOT_SIZE 1024
-#define MAX_NEAREST_NEIGHBOURS 100
+#define MAX_NEAREST_NEIGHBOURS 7000
 #define TRI_DIRECTION_CW 0
 
 #define SQ(x) ( (x) * (x) )
@@ -22,9 +22,6 @@
 	(dest)[0] = (point)[0] + t*(planeNormal)[0];\
 	(dest)[1] = (point)[1] + t*(planeNormal)[1];\
 	(dest)[2] = (point)[2] + t*(planeNormal)[2];}
-
-
-
 
 typedef struct edge_t{
 	struct point_t *a, *b;
@@ -46,7 +43,7 @@ typedef struct edgeSlot_t{
 	struct edge_t edges[EDGE_SLOT_SIZE];
 }edgeSlot;
 
-static struct edgeStack_t{
+static struct {
 	struct edgeSlot_t **slots;
 	int nrSlots;
 	int size;
@@ -74,7 +71,10 @@ static int edgesIntersept( float* p1, float* p2, float* p3, float* p4 ){
 	s = cross2v(vp1p3, v2) / den;
 	if( s < 0 || s > 1)
 		return 0;
-	t = (p1[0] - p3[0] + s*v1[0])/v2[0];
+	if( v2[0] != 0 )
+		t = (p1[0] - p3[0] + s*v1[0])/v2[0];
+	else
+		t = (p1[1] - p3[1] + s*v1[1])/v2[1];
 	if( t < 0 || t > 1 )
 		return 0;
 	return 1;
@@ -114,7 +114,7 @@ static edge* createEdge( point* a, point* b){
 			return NULL;
 	
 	for( length = edgeStack.lenght; length >= EDGE_SLOT_SIZE; length -= EDGE_SLOT_SIZE );
-	slotIndex = edgeStack.size / EDGE_SLOT_SIZE - 1;
+	slotIndex = edgeStack.lenght / EDGE_SLOT_SIZE;
 	newEdge = edgeStack.slots[slotIndex]->edges + length;
 	newEdge->a = a;
 	newEdge->b = b;
@@ -134,6 +134,18 @@ void deletePointArray(point* points, int size){
 	free(points);
 }
 
+void cleanEdgeStack(void){
+	int i;
+	edgeSlot **temp = edgeStack.slots;
+	for( i = 0; i < edgeStack.nrSlots; i++){
+		free(temp[i]);
+	}
+	
+	edgeStack.slots == NULL;
+
+	free(temp);
+}
+
 static int copyPointCoordinates( point* pntArray, float* modelVertexArray, int modelSize, float* dataVertexArray, int dataSize){
 	point *pointIndex, *endPntr;
 
@@ -142,8 +154,8 @@ static int copyPointCoordinates( point* pntArray, float* modelVertexArray, int m
 			pointIndex++, modelVertexArray += 3 ){
 				pointIndex->coords = modelVertexArray;
 				pointIndex->nrEdges = 0;
-				pointIndex->maxEdges = 8;
-				pointIndex->edges = (edge**)malloc(sizeof(edge*) * 8 );
+				pointIndex->maxEdges = 16;
+				pointIndex->edges = (edge**)malloc(sizeof(edge*) * 16 );
 				if(pointIndex->edges == NULL){
 					deletePointArray(pntArray, pointIndex - pntArray);
 					return 0;
@@ -154,8 +166,8 @@ static int copyPointCoordinates( point* pntArray, float* modelVertexArray, int m
 			pointIndex++, dataVertexArray += 3 ){
 				pointIndex->coords = dataVertexArray;
 				pointIndex->nrEdges = 0;
-				pointIndex->maxEdges = 8;
-				pointIndex->edges = (edge**)malloc(sizeof(edge*) * 8 );
+				pointIndex->maxEdges = 16;
+				pointIndex->edges = (edge**)malloc(sizeof(edge*) * 16 );
 				if(pointIndex->edges == NULL){
 					deletePointArray(pntArray, pointIndex - pntArray);
 					return 0;
@@ -229,10 +241,10 @@ static pointArray* createPointArray(float* modelVertexArray, int modelSize, unsi
 	(dest)[2] = (v1)[2] - (v2)[2]
 
 static int addTriagleList( arrayListui* list, point* points, edge** triangle ){
-	float ab[3], bc[3], cross[3];
+	double ab[3], bc[3], cross[3];
 	unsigned int tri[3];
 	point *A, *B, *C;
-	float sin;
+	double sin;
 	
 	B = triangle[0]->a;
 	C = triangle[0]->b;
@@ -268,14 +280,14 @@ static int addTriagleList( arrayListui* list, point* points, edge** triangle ){
 	return addToArrayListuiv(list, tri, 3);
 }
 
-static int edgeValid( point* current, point* toPnt, float* normal, edge** triangle ){
+static int edgeValid( point* current, point* toPnt, float* normal, edge** triangles, int* nrTriangles ){
 	float p2[3], p3[3], p4[3];
 	float *p1 = current->coords;
 	edge **currentOldEdge, **oldEdgeEdge, **endPntrCurrent, **endPntrOld;
 	point *connectedOldPoint, *oldPointsConnectedPoint;
 
 	projectPntPlane(p2, toPnt->coords, normal, p1);
-	triangle[0] = NULL;
+	*nrTriangles = 0;
 
 	for(currentOldEdge = current->edges, endPntrCurrent = current->edges + current->nrEdges;
 		currentOldEdge < endPntrCurrent; 
@@ -286,15 +298,17 @@ static int edgeValid( point* current, point* toPnt, float* normal, edge** triang
 			if(connectedOldPoint == toPnt)
 				return 0;//edge allready exist
 			projectPntPlane(p3, connectedOldPoint->coords, normal, p1);
-			for(	oldEdgeEdge = connectedOldPoint->edges, endPntrOld = connectedOldPoint->edges + connectedOldPoint->nrEdges;
-				oldEdgeEdge < endPntrOld;
-				oldEdgeEdge++ ){
+			for(	oldEdgeEdge = connectedOldPoint->edges, 
+					endPntrOld = connectedOldPoint->edges + connectedOldPoint->nrEdges;
+					oldEdgeEdge < endPntrOld;
+					oldEdgeEdge++ ){
 					oldPointsConnectedPoint = (*oldEdgeEdge)->a;
 					if( oldPointsConnectedPoint == connectedOldPoint )
 						oldPointsConnectedPoint = (*oldEdgeEdge)->b;
 					if( oldPointsConnectedPoint == toPnt ){
-						triangle[0] = oldEdgeEdge;//triangle match
-						triangle[1] = currentOldEdge;
+						triangles[*nrTriangles * 2 + 0] = *oldEdgeEdge;//triangle match
+						triangles[*nrTriangles * 2 + 1] = *currentOldEdge;
+						(*nrTriangles)++;
 					}
 					projectPntPlane(p4, oldPointsConnectedPoint->coords, normal, p1);
 					if( edgesIntersept(p1, p2, p3, p4) )
@@ -305,28 +319,32 @@ static int edgeValid( point* current, point* toPnt, float* normal, edge** triang
 }
 
 #define GET_WEIGHED_NORMAL(dest) {\
-	float w; unsigned int tpnt; float *normal;\
+	float w; unsigned int tpnt; float *normal;int validNeighbours = 0;\
 	(dest)[0] = 0;(dest)[1] = 0;(dest)[2] = 0;\
 	for( i = 0; i < MAX_NEAREST_NEIGHBOURS; i++){\
-		w = distance(point,kNNTopoint[i]);\
-		w = maxSQDistance/w;\
-		if((tpnt = mergedVertexArray - kNNTopoint[i]) > (unsigned int)modelSize){\
-			normal = dataNormals + tpnt - modelSize;\
-		}else\
-			normal = modelNormals + tpnt;\
-		(dest)[0] += normal[0] * w;\
-		(dest)[1] += normal[1] * w;\
-		(dest)[2] += normal[2] * w;\
+		if(kNNTopoint[i] != NULL){\
+			validNeighbours++;\
+			w = distance(point,kNNTopoint[i]);\
+			w = maxSQDistance/w;\
+			if((tpnt = mergedVertexArray - kNNTopoint[i]) > (unsigned int)modelSize){\
+				normal = dataNormals + tpnt - modelSize;\
+			}else\
+				normal = modelNormals + tpnt;\
+			(dest)[0] += normal[0] * w;\
+			(dest)[1] += normal[1] * w;\
+			(dest)[2] += normal[2] * w;\
+		}\
 	}\
-	(dest)[0] /= MAX_NEAREST_NEIGHBOURS;\
-	(dest)[0] /= MAX_NEAREST_NEIGHBOURS;\
-	(dest)[0] /= MAX_NEAREST_NEIGHBOURS;\
+	(dest)[0] /= validNeighbours;\
+	(dest)[0] /= validNeighbours;\
+	(dest)[0] /= validNeighbours;\
 	}
 
 arrayListui* greedyTriangulation(	geometryMesh* model, geometryMesh* data,
 									arrayListui* pointsToTrangulate, float maxSQDistance)
 {
 	/* Unpack meshes */
+	double w; unsigned int tpnt; float *normal;int validNeighbours = 0;
 	float *modelVertexArray = model->vertexArray, *modelNormals = model->normalsArray;
 	float *dataVertexArray = data->vertexArray, *dataNormals = data->normalsArray;
 	int modelSize = model->vertexCount, modelElementCount = model->elementCount;
@@ -336,37 +354,58 @@ arrayListui* greedyTriangulation(	geometryMesh* model, geometryMesh* data,
 	arrayListui *triangleList;
 	pointArray *pntArray;
 	unsigned int pointIndex, nearestPntIndex;
-	int i;
-	edge *isTriangle[3];
+	int i, nrTriangles;
+	edge *isTriangle[200], *newEdge;
 	float *mergedVertexArray, *kNNTopoint[MAX_NEAREST_NEIGHBOURS], *point, **nearestPoint, **kNNEndpntr;
-	float normal[3];
+	float weighedNormal[3];
 	kdTree_p tree;
 
 	/* Create a map over points and edges */
 	pntArray = createPointArray( modelVertexArray, modelSize, modelElementArray, modelElementCount,
-									dataVertexArray,  dataSize, dataElementArray, dataElementCount);
+		dataVertexArray,  dataSize, dataElementArray, dataElementCount);
 	mergedVertexArray = (float*)malloc(sizeof(float) * (modelSize + dataSize));
 	memcpy(mergedVertexArray, modelVertexArray, sizeof(float) * modelSize);
 	memcpy(mergedVertexArray + modelSize, dataVertexArray, sizeof(float) * dataSize);
-	
+
 	tree = createKD_Tree(mergedVertexArray, modelSize + dataSize);
 
 	kNNEndpntr = kNNTopoint + MAX_NEAREST_NEIGHBOURS;
 	triangleList = createArrayListui();
-	pointsToTrangulate->index = 0;
-	while(pointsToTrangulate->index < pointsToTrangulate->lenght){
+
+	for( pointsToTrangulate->index = 0; pointsToTrangulate->index < pointsToTrangulate->lenght; pointsToTrangulate->index++ ){
 		pointIndex = pointsToTrangulate->data[pointsToTrangulate->index];
 		point = mergedVertexArray + pointIndex;
 		kdTree_KNN(tree, kNNTopoint, point, MAX_NEAREST_NEIGHBOURS, maxSQDistance); 
-		GET_WEIGHED_NORMAL(normal);
+
+
+		(weighedNormal)[0] = 0;(weighedNormal)[1] = 0;(weighedNormal)[2] = 0;
+		for( i = 0; i < MAX_NEAREST_NEIGHBOURS; i++){
+			if(kNNTopoint[i] != NULL){
+				validNeighbours++;
+				if( (w = distance(point,kNNTopoint[i])) == 0)
+					continue;
+				w = maxSQDistance/w;
+				if((tpnt = kNNTopoint[i] - mergedVertexArray) > (unsigned int)modelSize){
+					normal = dataNormals + tpnt - modelSize;
+				}else
+					normal = modelNormals + tpnt;
+				(weighedNormal)[0] += (float)(normal[0] * w);
+				(weighedNormal)[1] += (float)(normal[1] * w);
+				(weighedNormal)[2] += (float)(normal[2] * w);
+			}
+		}
+		(weighedNormal)[0] /= validNeighbours;
+		(weighedNormal)[0] /= validNeighbours;
+		(weighedNormal)[0] /= validNeighbours;
+
 		for( nearestPoint = kNNTopoint; nearestPoint < kNNEndpntr; nearestPoint++){
 			if( (*nearestPoint) == NULL)
 				continue;
 			/* Caculate with nearestPoint index point (start-pointer - point-pointer) */
-			nearestPntIndex = mergedVertexArray - (*nearestPoint);
-			if(edgeValid(pntArray->points + pointIndex, pntArray->points + nearestPntIndex, normal, isTriangle) ){
+			nearestPntIndex = ((*nearestPoint) - mergedVertexArray)/3;
+			if(edgeValid(pntArray->points + pointIndex, pntArray->points + nearestPntIndex, weighedNormal, isTriangle, &nrTriangles) ){
 				/* Add an edge to your map */
-				if( (isTriangle[2] = createEdge(pntArray->points + pointIndex, pntArray->points + nearestPntIndex)) == NULL ){
+				if( (newEdge = createEdge(pntArray->points + pointIndex, pntArray->points + nearestPntIndex)) == NULL ){
 					deleteKD_Tree(tree);//out Of memmory;
 					free(mergedVertexArray);
 					deletePointArray(pntArray->points, pntArray->lenght);
@@ -376,8 +415,8 @@ arrayListui* greedyTriangulation(	geometryMesh* model, geometryMesh* data,
 				}
 				/* Add new point to try to trangulate */
 				addToArrayListui(pointsToTrangulate, nearestPntIndex);
-				if(isTriangle[0] != NULL){
-					if(!addTriagleList(triangleList, pntArray->points, isTriangle)){
+				for( i = 0; i < nrTriangles; i++ ){
+					if(!addTriagleList(triangleList, pntArray->points, isTriangle + i)){
 						deleteKD_Tree(tree);//out Of memmory;
 						free(mergedVertexArray);
 						deletePointArray(pntArray->points, pntArray->lenght);
@@ -393,6 +432,7 @@ arrayListui* greedyTriangulation(	geometryMesh* model, geometryMesh* data,
 	free(mergedVertexArray);
 	deletePointArray(pntArray->points, pntArray->lenght);
 	free(pntArray);
+	cleanEdgeStack();
 	return triangleList;
 }
 
@@ -400,31 +440,33 @@ geometryMesh* combimeMeshes(geometryMesh* model, geometryMesh* data, arrayListui
 
 	arrayListui *newTriangles;
 	geometryMesh *newMesh;
-	unsigned int *dataPointIndex, *endDataElementPntr, *newMeshElement;
+	unsigned int *dataElementIndex, *endDataElementPntr, *newMeshElement;
 	unsigned int dataPointOfset;
-
+	/* Create new triangles between meshes */
+	newTriangles = greedyTriangulation(model, data, cutEdgePoints, maxSQDistance);
+	if(newTriangles == NULL)
+		return NULL;
+	
 	newMesh = (geometryMesh*)malloc(sizeof(geometryMesh));
 	
 	/* Allocate place for new VertexArray */
-	newMesh->vertexCount = model->vertexCount + model->vertexCount;
+	newMesh->vertexCount = model->vertexCount + data->vertexCount;
 	newMesh->vertexArray = (float*)malloc(sizeof(float) * newMesh->vertexCount);
 	/* Copy vertex data */
 	memcpy(newMesh->vertexArray, model->vertexArray, sizeof(float) * model->vertexCount);
 	memcpy(newMesh->vertexArray + model->vertexCount, data->vertexArray, sizeof(float) * data->vertexCount);
-	/* Create new triangles between meshes */
-	newTriangles = greedyTriangulation(model, data, cutEdgePoints, maxSQDistance);
 	/* Allocate memmory for element array */
 	newMesh->elementCount = model->elementCount + data->elementCount + newTriangles->lenght;
 	newMesh->elementArray = (unsigned int*)malloc(sizeof(unsigned int) * newMesh->elementCount);
 	/* copy triangle information */
 	memcpy(newMesh->elementArray, model->elementArray, sizeof(unsigned int) * model->elementCount);
 	/* copy triangle information from data set, and compensate for index increace from merging */
-	dataPointOfset = (unsigned int)model->vertexCount;
-	dataPointIndex = data->elementArray;
+	dataPointOfset = (unsigned int)(model->vertexCount/3);
+	dataElementIndex = data->elementArray;
 	endDataElementPntr = data->elementArray + data->elementCount;
 	newMeshElement = newMesh->elementArray + model->elementCount;
-	for( ; dataPointIndex < endDataElementPntr; dataPointIndex++, newMeshElement++ ){
-			*newMeshElement = *dataPointIndex + dataPointOfset;
+	for( ; dataElementIndex < endDataElementPntr; dataElementIndex++, newMeshElement++ ){
+			*newMeshElement = (*dataElementIndex) + dataPointOfset;
 	}
 	/* Copy New triangles to Element Array */
 	memcpy(newMesh->elementArray + model->elementCount + data->elementCount, newTriangles->data, sizeof(unsigned int) * newTriangles->lenght);

@@ -5,13 +5,16 @@
 #include "vector.h"
 #include "arrayList.h"
 #include "icp.h"
+#include "binarySearch.h"
+#include "greedyTriangulation.h"
 
 #define EPSILON 0.000001f
 #define CLOSE_SQ_DISTANCE 1.0
 #define MAX_SQ_DISTANCE 1.0f
 #define OCTREE_DEPTH 4
 #define NUM_DIMENSIONS 3
-#define MAX_GLOBAL_REGISTRATION_RESTARTS 20
+#define MAX_GLOBAL_REGISTRATION_RESTARTS 5
+#define USE_RADIUS 0
 
 #define cross3v(dest, v1, v2) \
 	(dest)[0] = (v1)[1] * (v2)[2] - (v1)[2] * (v2)[1];\
@@ -123,21 +126,23 @@ static int vertexInRadiusModelTri( unsigned int* element, int size, float* verte
 	return 0;
 }
 
-static int recRayIntersectsOctTree( octTreeNode_p root, float* vertexData, float* ray, float* rayOrigin ){
+static int pointInOctTree( octTreeNode_p root, float* vertexData, float* ray, float* rayOrigin ){
 	if( nodeInDistance(root, rayOrigin, MAX_SQ_DISTANCE) ){
 		if( getNodesChildren(root) != NULL ){
 			int i;
 			for( i = 0; i < 8; i++ ){
-				if(recRayIntersectsOctTree(getNodesChild(root, i),vertexData, ray, rayOrigin)){
+				if(pointInOctTree(getNodesChild(root, i),vertexData, ray, rayOrigin)){
 					return 1;
 				}
 			}
 		}else{
 			arrayListui *nodesDataList;
 			if( (nodesDataList = (arrayListui*)getNodesDataPntr(root)) != NULL ){
-				//return vertexInRadiusModelTri(nodesDataList->data, nodesDataList->lenght, vertexData, rayOrigin);
-
-				return rayIntersectsDataOctTree(nodesDataList, vertexData, ray, rayOrigin);
+				if( USE_RADIUS ){
+					return vertexInRadiusModelTri(nodesDataList->data, nodesDataList->lenght, vertexData, rayOrigin);
+				}else{
+					return rayIntersectsDataOctTree(nodesDataList, vertexData, ray, rayOrigin);
+				}
 			}
 			return 0;
 		}
@@ -149,8 +154,9 @@ static int recRayIntersectsOctTree( octTreeNode_p root, float* vertexData, float
 /* creates a list of vertex indexes that are beeing represented by model and data triangulated mesh
 * 
 */
-static arrayListui* modelNormalShootToOctTree(	float* modelVertexArray, float* modelNormalArray, int modelSize,
-	octTreeNode_p root, float* dataVertexArray){
+static arrayListui* modelRepresentedByDataList(	float* modelVertexArray, float* modelNormalArray, int modelSize,
+												octTreeNode_p root, float* dataVertexArray)
+{
 		arrayListui *elementList;
 		float *vertex;
 		float *endPntr = modelVertexArray + modelSize;
@@ -161,7 +167,7 @@ static arrayListui* modelNormalShootToOctTree(	float* modelVertexArray, float* m
 			vertex < endPntr; 
 			vertex += NUM_DIMENSIONS, modelNormalArray += NUM_DIMENSIONS )
 		{
-			if(recRayIntersectsOctTree(root, dataVertexArray, modelNormalArray, vertex)){
+			if(pointInOctTree(root, dataVertexArray, modelNormalArray, vertex)){
 				addToArrayListui(elementList, vertex - modelVertexArray);
 			}
 		}
@@ -230,25 +236,29 @@ static int recAddTriangleData( octTreeNode_p root, float* pointData, unsigned in
 /* Given the index list of vertexes to delete, 
 * creates new array and coppys all the values to new array, exept the one with delete index
 */
-static float* restructureVertexArray( float* vertexArray, int size, arrayListui* indexToDeleteList ){
+static float* restructureVertexArray( float* vertexArray, int size, arrayListui* indexToDeleteList, int* newVertexCount ){
 	float *newVertexArray;
-	int copyTo, copyFrom, numberOfElements, elementsCopyed, newSize = size - indexToDeleteList->lenght * NUM_DIMENSIONS;
+	int copyTo, copyFrom, numberOfElements, elementsCopyed, newSize = size - (indexToDeleteList->lenght * NUM_DIMENSIONS);
 	unsigned int *index, *endPntr;
 	newVertexArray = (float*)malloc(newSize * sizeof(float));
 	copyFrom = 0;
 	elementsCopyed = 0;
-	for( index = indexToDeleteList->data, endPntr = indexToDeleteList->data + indexToDeleteList->size;
+	for( index = indexToDeleteList->data, endPntr = indexToDeleteList->data + indexToDeleteList->lenght;
 		index < endPntr; index++ ){
-			copyTo = (*index) * NUM_DIMENSIONS;
+			copyTo = (*index);
 			if( (numberOfElements = (copyTo - copyFrom)  ) > 0 ){
-				elementsCopyed += numberOfElements;
-				if(elementsCopyed > newSize){//To many elements;
+				
+				if( (elementsCopyed + numberOfElements) > newSize){//To many elements;
 					free(newVertexArray);
 					return NULL;
 				}
 				memcpy(newVertexArray + elementsCopyed, vertexArray + copyFrom, numberOfElements * sizeof(float));
-				copyFrom += (copyTo + 1);
+				elementsCopyed += numberOfElements;
+				copyFrom = (copyTo + NUM_DIMENSIONS);
 
+			}else if(numberOfElements==0){
+				copyFrom += NUM_DIMENSIONS;
+				continue;
 			}
 			else{
 				//Error
@@ -257,7 +267,59 @@ static float* restructureVertexArray( float* vertexArray, int size, arrayListui*
 			}
 
 	}
+	numberOfElements = size - copyFrom;
+	if( (elementsCopyed + numberOfElements) > newSize ){
+		//Error
+		free(newVertexArray);
+		return NULL;
+	}
+	memcpy(newVertexArray + elementsCopyed, vertexArray + copyFrom, numberOfElements * sizeof(float));
+	*newVertexCount = newSize;
+	return newVertexArray;
+}
 
+static unsigned int* restructureElementArray(	unsigned int* elementArray, int size, 
+												arrayListui* indexToDeleteList, int* newElementCount )
+{
+	unsigned int *newElementArray;
+	int copyTo, copyFrom, numberOfElements, elementsCopyed, newSize = size - indexToDeleteList->lenght * NUM_DIMENSIONS;
+	unsigned int *index, *endPntr;
+	newElementArray = (unsigned int*)malloc(newSize * sizeof(unsigned int));
+	copyFrom = 0;
+	elementsCopyed = 0;
+	for( index = indexToDeleteList->data, endPntr = indexToDeleteList->data + indexToDeleteList->lenght;
+		index < endPntr; index++ ){
+			copyTo = (*index);
+			if( (numberOfElements = (copyTo - copyFrom)  ) > 0 ){
+				
+				if( (elementsCopyed + numberOfElements) > newSize){//To many elements;
+					free(newElementArray);
+					return NULL;
+				}
+				memcpy(newElementArray + elementsCopyed, elementArray + copyFrom, numberOfElements * sizeof(float));
+				elementsCopyed += numberOfElements;
+				copyFrom = (copyTo + NUM_DIMENSIONS);
+
+			}else if(numberOfElements==0){
+				copyFrom += NUM_DIMENSIONS;
+				continue;
+			}
+			else{
+				//Error
+				free(newElementArray);
+				return NULL;
+			}
+
+	}
+	numberOfElements = size - copyFrom;
+	if( (elementsCopyed + numberOfElements) > newSize ){
+		//Error
+		free(newElementArray);
+		return NULL;
+	}
+	memcpy(newElementArray + elementsCopyed, elementArray + copyFrom, numberOfElements * sizeof(float));
+	*newElementCount = newSize;
+	return newElementArray;
 }
 
 int octTreeAddTriData( octTreeNode_p root, void* dataPack, int size ){
@@ -277,7 +339,8 @@ void deleteDataFnc(void* dataList){
 }
 
 octTree_p createOctTreeTrangulated(	float* vertexArray, int vertexCount,
-									unsigned int* elementsArray, int elementCount ){
+									unsigned int* elementsArray, int elementCount )
+{
 		octTree_p tree;
 		Vector3f minBound, maxBound;
 		triDataPack dataPacked;
@@ -291,7 +354,8 @@ octTree_p createOctTreeTrangulated(	float* vertexArray, int vertexCount,
 }
 
 static arrayListui* radiusToModel(	float* modelVertexArray, int modelSize, 
-									float* dataVertexArray, int dataSize){
+									float* dataVertexArray, int dataSize)
+{
 		arrayListui *elementList;
 		float *vertex;
 		float *endPntr = modelVertexArray + modelSize;
@@ -342,10 +406,41 @@ static arrayListui* getDuplicatedVertexList(	float* modelVertexArray, float* mod
 		if( modelTree == NULL )
 			return NULL;
 		
-		unionVertexIndexList = modelNormalShootToOctTree(modelVertexArray, modelNormalArray, modelSize, getRootOctTree(modelTree), dataVertexArray);
+		unionVertexIndexList = modelRepresentedByDataList(modelVertexArray, modelNormalArray, modelSize, getRootOctTree(modelTree), dataVertexArray);
+		deleteOctTree(modelTree);
 		if( unionVertexIndexList->lenght == 0 )
 			return NULL;
 		return unionVertexIndexList;
+}
+
+static arrayListui* getElemetnListToDelete( unsigned int* modelElementArray, int modelElementCount,
+											arrayListui* deletedVertexList, arrayListui* createdCutEdge)
+{
+	int p1WasDeleted, p2WasDeleted, p3WasDeleted, p1Pos, p2Pos, p3Pos;
+	int deletedSize = deletedVertexList->lenght;
+	unsigned int *modelElements = modelElementArray, *elementEndPntr, *deletedList = deletedVertexList->data;
+	arrayListui *elementsDeleteList;
+
+	elementsDeleteList = createArrayListui();
+	for( elementEndPntr = modelElements + modelElementCount; modelElements < elementEndPntr; modelElements += 3 ){
+		p1WasDeleted = binarySearchui(modelElements[0] * 3, deletedList, deletedSize, &p1Pos);
+		p2WasDeleted = binarySearchui(modelElements[1] * 3, deletedList, deletedSize, &p2Pos);
+		p3WasDeleted = binarySearchui(modelElements[2] * 3, deletedList, deletedSize, &p3Pos);
+		if( p1WasDeleted > 0 || p2WasDeleted > 0 || p3WasDeleted > 0 ){
+			addToArrayListui(elementsDeleteList, modelElements - modelElementArray);
+			if( !(p1WasDeleted > 0) )
+				addToArrayListui( createdCutEdge, modelElements[0] - p1Pos);
+			if( !(p2WasDeleted > 0) )
+				addToArrayListui( createdCutEdge, modelElements[1] - p2Pos);
+			if( !(p3WasDeleted > 0) )
+				addToArrayListui( createdCutEdge, modelElements[2] - p3Pos);
+		}else{
+			modelElements[0] -= p1Pos;
+			modelElements[1] -= p2Pos;
+			modelElements[2] -= p3Pos;
+		}
+	}
+	return elementsDeleteList;
 }
 
 //#define region3() {s = 0; t = (e >= 0) ? 0 : ( (-e >= c) ? 1 : -e/c );  }
@@ -639,7 +734,7 @@ static void registerData( float* dataVertexArray, int dataSize, float* registati
 	}
 }
 
-static int alignedMeshes(	float* modelVertexArray, int modelSize,
+static void aligneMeshes(	float* modelVertexArray, int modelSize,
 							float* dataVertexArray, int dataSize )
 {
 	Vector3f min, max;
@@ -651,3 +746,76 @@ static int alignedMeshes(	float* modelVertexArray, int modelSize,
 	free(registrationMatrix);
 }
 
+geometryMesh* pointCloudCombine( geometryMesh* model, geometryMesh* data, arrayListf* subMesh ){
+	geometryMesh *combinedMesh, *newModel;
+	arrayListui *dublicatedVertexes, *deleteElementsModelList, *cutEdgeList;
+
+	/* run the ICP to find the best position for the data mesh in user selected submesh*/
+	//aligneMeshes(subMesh->data, subMesh->lenght, data->vertexArray, data->vertexCount);
+	/* With the best registration applyed to data set we can try to find points that exist in bouth meshes */
+	dublicatedVertexes = 
+		getDuplicatedVertexList(	model->vertexArray, model->normalsArray, model->vertexCount,
+		data->vertexArray, data->vertexCount, data->elementArray, data->elementCount);
+		
+	newModel = (geometryMesh*)malloc(sizeof(geometryMesh));
+
+	/* Given the list of indexes to delete we now delete dublicated points from model mesh */
+	newModel->vertexArray = 
+		restructureVertexArray( model->vertexArray, model->vertexCount,
+		dublicatedVertexes, &(newModel->vertexCount));
+	if(newModel->vertexArray == NULL){
+		deleteArrayListui(dublicatedVertexes);
+		free(newModel);
+		return NULL;
+	}
+	newModel->normalsArray = 
+		restructureVertexArray( model->normalsArray, model->vertexCount,
+		dublicatedVertexes, &(newModel->vertexCount));
+	if(newModel->normalsArray == NULL){
+		deleteArrayListui(dublicatedVertexes);
+		free(newModel->vertexArray);
+		free(newModel);
+		return NULL;
+	}
+	/* Given the information of old triangulation we can extract "cut edge"(boundary between model and data */
+	cutEdgeList = createArrayListui();
+	if(cutEdgeList == NULL){
+		deleteArrayListui(dublicatedVertexes);
+		free(newModel->vertexArray);
+		free(newModel->normalsArray);
+		free(newModel);
+		return NULL;
+	}
+	deleteElementsModelList = getElemetnListToDelete(model->elementArray, model->elementCount, dublicatedVertexes, cutEdgeList);
+	if(deleteElementsModelList == NULL){
+		deleteArrayListui(dublicatedVertexes);
+		deleteArrayListui(cutEdgeList);
+		free(newModel->vertexArray);
+		free(newModel->normalsArray);
+		free(newModel);
+		return NULL;
+	}
+	/* Remove old Triangle information */
+	newModel->elementArray = 
+		restructureElementArray(model->elementArray, model->elementCount, 
+								deleteElementsModelList, &(newModel->elementCount));
+	if(newModel->elementArray == NULL){
+		deleteArrayListui(dublicatedVertexes);
+		deleteArrayListui(cutEdgeList);
+		deleteArrayListui(deleteElementsModelList);
+		free(newModel->vertexArray);
+		free(newModel->normalsArray);
+		free(newModel);
+		return NULL;
+	}
+	combinedMesh = combimeMeshes(newModel, data, cutEdgeList, MAX_SQ_DISTANCE*200);
+
+	deleteArrayListui(dublicatedVertexes);
+	deleteArrayListui(deleteElementsModelList);
+	deleteArrayListui(cutEdgeList);
+	free(newModel->elementArray);
+	free(newModel->normalsArray);
+	free(newModel->vertexArray);
+	free(newModel);
+	return combinedMesh;
+}

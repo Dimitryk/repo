@@ -16,12 +16,17 @@
 #include "arrayList.h"
 #include "mouseFunctions.h"
 #include "pointCloudCombine.h"
+#include "objectGeometryMeshConverter.h"
+#include "geometryMesh.h"
+#include "pointCloudCombine.h"
 
 #define windowWidth 500
 #define windowHeight 500
 
 GLSLprogram *gouraudShading;
 GLuint ppBuffer;
+
+int startDraw = 0;
 
 const int g_projectionBlockIndex = 2;
 
@@ -131,11 +136,23 @@ static int loadPointMeshFile(void){
 	printf("Please type the name of the file you want to open \n");
 	gets(fileName);
 	if( (mesh = createMeshObject(fileName, gouraudShading)) != NULL){
-		objectsArray[objectsCount++] = *mesh;
+		objectsArray[objectsCount++] = mesh;
 	}else
 		printf("Error: file could not be opened");
 
 	return 0;
+}
+
+static void setMarkingColor(void){
+	markingColor[0] = 0.0f;
+	markingColor[1] = -0.70f;
+	markingColor[2] = -0.70f;
+	markingColor[3] = 0.0f;
+
+	reverseMarkingColor[0] = 0.0f;
+	reverseMarkingColor[1] = 0.00f;
+	reverseMarkingColor[2] = 0.00f;
+	reverseMarkingColor[3] = 0.0f;
 }
 
 void init(void){
@@ -162,10 +179,12 @@ void init(void){
 	glDepthRange(0.0f, 1.0f);
 	glEnable(GL_DEPTH_CLAMP);
 
+	objectsArray = (meshObject**)malloc(sizeof(meshObject*) * MAX_OBJECTS);
 	loadPointMeshFile();
 	loadPointMeshFile();
 	userDefinedSegmentVertex = createArrayListf();
-	userDefinedSegmentNormals = createArrayListf();
+	userDefinedSegmentColor = createArrayListui();
+	setMarkingColor();
 }
 
 void display(void)
@@ -180,8 +199,8 @@ void display(void)
 	gTranslate3f(-position.x,-position.y,-position.z);
 	gStackMultiply(orientationMatrix);
 
-	for(i = 0; i < objectsCount; i++){
-		drawMeshObject(&objectsArray[i]);
+	for(i = startDraw; i < objectsCount; i++){
+		drawMeshObject(objectsArray[i]);
 	}
 	
 	gPopMatrix();
@@ -205,15 +224,19 @@ void reshape (int w, int h)
 	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 }
 
-void colorIndexes( meshObject* obj, arrayListui* list ){
+void colorIndexes( meshObject *obj, arrayListui* list, float* color ){
 	int i;
 	if (list == NULL)
 		return;
+
 	for ( i = 0; i< list->lenght; i++){
-		obj->colorArray[list->data[i] / 3 * 4 + 1] = -0.7f;
-		obj->colorArray[list->data[i] / 3 * 4 + 2] = -0.7f;
+		obj->colorArray[list->data[i] + 0] = color[0];
+		obj->colorArray[list->data[i] + 1] = color[1];
+		obj->colorArray[list->data[i] + 2] = color[2];
+		obj->colorArray[list->data[i] + 3] = color[3];
 	}
 	meshObjectUpdateColorBuffer(obj);
+
 	glutPostRedisplay();
 }
 
@@ -222,23 +245,26 @@ void keyboardS(GLint key, GLint x, GLint y)
 	switch (key) {
 	case GLUT_KEY_UP:
 		{
-
-			position.z += 5;
+			startDraw++;
 			glutPostRedisplay();
 		}
 		break;
 	case GLUT_KEY_DOWN:
 		{
-			position.z -= 5;
+			startDraw--;
 			glutPostRedisplay();
 		};
 		break;
 	case GLUT_KEY_RIGHT:
 		{
-			vertexIndex = pointCloudCombine(	objectsArray[0].vertexArray, objectsArray[0].normalsArray, objectsArray[0].vertexCount,
-				objectsArray[1].vertexArray, objectsArray[1].vertexCount,
-				objectsArray[1].elementArray, (int)objectsArray[1].elementCount);
-			colorIndexes(objectsArray, vertexIndex);
+			geometryMesh *model, *data, *out;
+			meshObject *temp;
+			model = convertObjectGeometryMesh(objectsArray[0]);
+			data = convertObjectGeometryMesh(objectsArray[1]);
+			out = pointCloudCombine(model, data, userDefinedSegmentVertex);
+			temp = objectsArray[0];
+			deleteMeshObject(objectsArray[0]);
+			objectsArray[0] = meshObjectFromGeometry(out, gouraudShading);
 		};
 		break;
 	case GLUT_KEY_LEFT:
