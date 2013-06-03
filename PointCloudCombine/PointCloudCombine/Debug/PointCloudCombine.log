@@ -1,27 +1,15 @@
-﻿Build started 03.05.2013 13:38:38.
+﻿Build started 29.05.2013 14:26:00.
      1>Project "C:\Users\Dimi\Documents\Visual Studio 2010\Projects\PointCloudCombine\PointCloudCombine\PointCloudCombine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\PointCloudCombine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        GenerateTargetFrameworkMonikerAttribute:
        Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
        ClCompile:
-         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /AI"C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TC /analyze- /errorReport:prompt greedyTriangulation.c pointCloudCombine.c /clr:nostdlib 
-         greedyTriangulation.c
-     1>greedyTriangulation.c(144): warning C4553: '==' : operator has no effect; did you intend '='?
-     1>greedyTriangulation.c(289): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(289): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(289): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(300): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(300): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(300): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(313): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(313): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>greedyTriangulation.c(313): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-         pointCloudCombine.c
-     1>pointCloudCombine.c(382): warning C4101: 'distance' : unreferenced local variable
-         Generating Code...
-     1>c:\users\dimi\documents\visual studio 2010\projects\pointcloudcombine\pointcloudcombine\greedytriangulation.c(107): warning C4715: 'pointAddEdge' : not all control paths return a value
-     1>c:\users\dimi\documents\visual studio 2010\projects\pointcloudcombine\pointcloudcombine\greedytriangulation.c(100): warning C4715: 'growPointEdgesArray' : not all control paths return a value
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /AI"C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TC /analyze- /errorReport:prompt Program.c /clr:nostdlib 
+         Program.c
+     1>Program.c(137): warning C4996: 'gets': This function or variable may be unsafe. Consider using gets_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(277) : see declaration of 'gets'
+     1>Program.c(134): warning C4101: 'mesh' : unreferenced local variable
          All outputs are up-to-date.
        Link:
          C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Dimi\Documents\Visual Studio 2010\Projects\PointCloudCombine\Debug\PointCloudCombine.exe" /INCREMENTAL /NOLOGO /MANIFEST /ManifestFile:"Debug\PointCloudCombine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Dimi\Documents\Visual Studio 2010\Projects\PointCloudCombine\Debug\PointCloudCombine.pdb" /ASSEMBLYDEBUG /TLBID:1 /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X86 Debug\arrayList.obj
@@ -55,4 +43,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.13
+Time Elapsed 00:00:01.67

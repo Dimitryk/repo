@@ -4,7 +4,7 @@
  * TODO encapsulate window dependent variables to reduce dependency and suport multi threading (multi window)
  */
 
-#include "gl3w.h"
+#include "gl3w.h" /*Must be befor other GL heades*/
 #include <GL\freeglut.h>
 #include <stdio.h>
 #include <math.h>
